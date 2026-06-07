@@ -16,7 +16,6 @@ public class BhatAgentTool {
     public static final String BASE_URL = "http://localhost:11434/api/chat";
     public static final String MODEL = "huihui_ai/Qwen3.6-abliterated:27b";
 //    public static final String MODEL = "huihui_ai/qwen2.5-abliterate:32b-instruct-q4_K_M";
-//    public static final String MODEL = "huihui_ai/qwen2.5-coder-abliterate:7b";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
@@ -178,7 +177,7 @@ public class BhatAgentTool {
         chatHistory.add(new ChatMessage("system", "You are an expert coding agent. " +
                 "You are responsible for invoking the right kind of tools while coding"));
 
-        System.out.println("=== Bhatman Ready ===");
+        System.out.println("=== Bhatman is Ready ===");
         System.out.println("Type your instructions below. Type '.exit' to quit.\n");
 
         while (true) {
@@ -251,91 +250,122 @@ public class BhatAgentTool {
             return;
         }
 
+        String toolExecutionErrorMessage = "Something went wrong while executing" + functionName + "try doing it again and check if you have all the arguments";
+
         if ("write_file_to_disk".equals(functionName)) {
-            String filename = arguments.get("filename").asText();
-            String content = arguments.get("content").asText();
-            String toolResult = Tools.localWriteFile(filename, content);
-            chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            try {
+                String filename = arguments.get("filename").asText();
+                String content = arguments.get("content").asText();
+                String toolResult = Tools.localWriteFile(filename, content);
+                chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            } catch (Exception e) {
+                chatHistory.add((new ChatMessage("tool", toolExecutionErrorMessage, null, functionName)));
+            }
         }
 
         if ("exec_cmd".equals(functionName)) {
-            String command = arguments.get("command").asText();
-            String toolResult = Tools.execCommand(command, scanner);
-            System.out.println(toolResult);
-            chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            try {
+                String command = arguments.get("command").asText();
+                String toolResult = Tools.execCommand(command, scanner);
+                System.out.println(toolResult);
+                chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            } catch (Exception e) {
+                chatHistory.add((new ChatMessage("tool", toolExecutionErrorMessage, null, functionName)));
+            }
         }
 
         if ("read_file".equals(functionName)) {
-            String pathname = arguments.get("path").asText();
-            String toolResult = Tools.localReadFile(pathname);
-            chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            try {
+                String pathname = arguments.get("path").asText();
+                String toolResult = Tools.localReadFile(pathname);
+                chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            } catch (Exception e) {
+                chatHistory.add((new ChatMessage("tool", toolExecutionErrorMessage, null, functionName)));
+            }
         }
 
         if("delete_file".equals(functionName)) {
-            String pathname = arguments.get("path").asText();
-            String toolResult = Tools.localDeleteFile(pathname);
-            chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            try {
+                String pathname = arguments.get("path").asText();
+                String toolResult = Tools.localDeleteFile(pathname);
+                chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            } catch (Exception e) {
+                chatHistory.add((new ChatMessage("tool", toolExecutionErrorMessage, null, functionName)));
+            }
         }
 
         if("list_directory_contents".equals(functionName)) {
-            String toolResult = Arrays.toString(Tools.listDirectoryContents().toArray(new String[0]));
-            chatHistory.add((new ChatMessage("tool", toolResult, null, functionName)));
+            try {
+                String toolResult = Arrays.toString(Tools.listDirectoryContents().toArray(new String[0]));
+                chatHistory.add((new ChatMessage("tool", toolResult, null, functionName)));
+            } catch (Exception e) {
+                chatHistory.add((new ChatMessage("tool", toolExecutionErrorMessage, null, functionName)));
+            }
         }
 
         if ("read_file_lines".equals(functionName)) {
-            String filename = arguments.get("filename").asText();
-            int startLine = arguments.get("start_line").asInt();
-            int endLine = arguments.get("end_line").asInt();
-
-            String toolResult = Tools.readFileLines(filename, startLine, endLine);
-
-            System.out.println("\n[File Context Retrieved (" + filename + " lines " + startLine + "-" + endLine + ")]:\n" + toolResult);
-
-            chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            try {
+                String filename = arguments.get("filename").asText();
+                int startLine = arguments.get("start_line").asInt();
+                int endLine = arguments.get("end_line").asInt();
+                String toolResult = Tools.readFileLines(filename, startLine, endLine);
+                System.out.println("\n[File Context Retrieved (" + filename + " lines " + startLine + "-" + endLine + ")]:\n" + toolResult);
+                chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            } catch (Exception e) {
+                chatHistory.add((new ChatMessage("tool", toolExecutionErrorMessage, null, functionName)));
+            }
         }
 
         if ("replace_string_in_file".equals(functionName)) {
-            String filename = arguments.get("filename").asText();
-            String oldString = arguments.get("old_string").asText();
-            String newString = arguments.get("new_string").asText();
-
-            System.out.println("\n[Agent Patching File]: " + filename);
-            String toolResult = Tools.replaceStringInFile(filename, oldString, newString);
-            System.out.println(toolResult);
-
-            chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            try {
+                String filename = arguments.get("filename").asText();
+                String oldString = arguments.get("old_string").asText();
+                String newString = arguments.get("new_string").asText();
+                System.out.println("\n[Agent Patching File]: " + filename);
+                String toolResult = Tools.replaceStringInFile(filename, oldString, newString);
+                System.out.println(toolResult);
+                chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            } catch (Exception e) {
+                chatHistory.add((new ChatMessage("tool", toolExecutionErrorMessage, null, functionName)));
+            }
         }
 
         if ("insert_text_after_line".equals(functionName)) {
-            String filename = arguments.get("filename").asText();
-            int lineNumber = arguments.get("line_number").asInt();
-            String textToInsert = arguments.get("text_to_insert").asText();
-
-            System.out.println("\n[Agent Inserting Code]: After line " + lineNumber + " in " + filename);
-            String toolResult = Tools.insertTextAfterLine(filename, lineNumber, textToInsert);
-            System.out.println(toolResult);
-
-            chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            try {
+                String filename = arguments.get("filename").asText();
+                int lineNumber = arguments.get("line_number").asInt();
+                String textToInsert = arguments.get("text_to_insert").asText();
+                System.out.println("\n[Agent Inserting Code]: After line " + lineNumber + " in " + filename);
+                String toolResult = Tools.insertTextAfterLine(filename, lineNumber, textToInsert);
+                System.out.println(toolResult);
+                chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            } catch (Exception e) {
+                chatHistory.add((new ChatMessage("tool", toolExecutionErrorMessage, null, functionName)));
+            }
         }
 
         if ("duckduckgo_search".equals(functionName)) {
-            String query = arguments.get("query").asText();
-
-            System.out.println("\n[Agent Querying DuckDuckGo]: " + query);
-            String toolResult = Tools.duckduckgoSearch(query);
-            System.out.println("[Search complete. Extracted top search engine snippets.]");
-
-            chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            try {
+                String query = arguments.get("query").asText();
+                System.out.println("\n[Agent Querying DuckDuckGo]: " + query);
+                String toolResult = Tools.duckduckgoSearch(query);
+                System.out.println("[Search complete. Extracted top search engine snippets.]");
+                chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            } catch (Exception e) {
+                chatHistory.add((new ChatMessage("tool", toolExecutionErrorMessage, null, functionName)));
+            }
         }
 
         if ("search_codebase".equals(functionName)) {
-            String searchQuery = arguments.get("search_query").asText();
-
-            System.out.println("\n[Agent Grepping Codebase for]: " + searchQuery);
-            String toolResult = Tools.searchCodebase(searchQuery);
-            System.out.println("[Search Finished. Found matches returned to history context.]");
-
-            chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            try {
+                String searchQuery = arguments.get("search_query").asText();
+                System.out.println("\n[Agent Grepping Codebase for]: " + searchQuery);
+                String toolResult = Tools.searchCodebase(searchQuery);
+                System.out.println("[Search Finished. Found matches returned to history context.]");
+                chatHistory.add(new ChatMessage("tool", toolResult, null, functionName));
+            } catch (Exception e) {
+                chatHistory.add((new ChatMessage("tool", toolExecutionErrorMessage, null, functionName)));
+            }
         }
     }
 
