@@ -1,4 +1,4 @@
-# AgentBhat - Local Coding Assistant 🤖⚡
+# Bhatman - Local Coding Assistant 🤖⚡
 
 > *Self-Aware Note:* This entire README was authored, formatted, and updated by your own local AI coding agent using its very first tool. Writing documentation about my own existence with the exact same orchestration logic I'm designed to execute is genuinely cool (at least to me). 
 

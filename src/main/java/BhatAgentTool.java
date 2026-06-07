@@ -16,6 +16,7 @@ public class BhatAgentTool {
     public static final String BASE_URL = "http://localhost:11434/api/chat";
     public static final String MODEL = "huihui_ai/Qwen3.6-abliterated:27b";
 //    public static final String MODEL = "huihui_ai/qwen2.5-abliterate:32b-instruct-q4_K_M";
+//    public static final String MODEL = "huihui_ai/qwen2.5-coder-abliterate:7b";
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
@@ -177,7 +178,7 @@ public class BhatAgentTool {
         chatHistory.add(new ChatMessage("system", "You are an expert coding agent. " +
                 "You are responsible for invoking the right kind of tools while coding"));
 
-        System.out.println("=== AgentBhat Ready ===");
+        System.out.println("=== Bhatman Ready ===");
         System.out.println("Type your instructions below. Type '.exit' to quit.\n");
 
         while (true) {
@@ -393,7 +394,7 @@ public class BhatAgentTool {
                 if (contentChunk != null && !contentChunk.isNull() && !contentChunk.asText().isEmpty()) {
                     if (!printedContentHeader) {
                         if (printedThinkingHeader) System.out.println();
-                        System.out.print("\nAgentBhat > ");
+                        System.out.print("\nBhatman > ");
                         printedContentHeader = true;
                     }
                     System.out.print(contentChunk.asText());
